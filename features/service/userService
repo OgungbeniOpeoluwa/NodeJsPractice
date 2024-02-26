@@ -1,0 +1,70 @@
+const User = require("../model/User")
+const exception = require("../Exceptions/NotFoundException")
+const createUser = async(request)=>{
+    const {firstname,lastname,email,password} = request;
+    
+    const user = await User.findOne({email});
+    if(user){
+        throw new exception("Email already in use");
+    }
+    const newUser = {
+        firstname:firstname,
+        lastname:lastname,
+        email:email,
+        password:password
+    };
+     const saveUser = await User.create(newUser);
+      const response = {
+        _id:saveUser._id,
+        firstname:saveUser.firstname,
+        lastname:saveUser.lastname,
+        email:saveUser.email,
+      }   
+
+      return {
+        data:response,
+        message:"Registration successful"
+      }
+
+    
+}
+
+const login = async(request)=>{
+    const{email,password} = request;
+    const user = await User.findOne({email});
+    if(!user){
+        throw new exception("User doesn't exist")
+    }; 
+    if (user.password !== password){
+        throw new exception("Invalid details");
+    }
+    if(user.password === password){
+     return {
+        mesg:"Login successful"
+    }
+}
+}
+
+const findUser = async(request)=>{
+    const{email}=request;
+    const user = await User.findOne({email});
+    if(!user){
+        throw new exception("User doesn't exist")
+    }
+    return{
+        mesg:user
+    }
+}
+
+const deleteUser = async(request)=>{
+    const {email}= request;
+    const user = await User.findOne({email})
+    if(!user){
+        throw new exception("User doesn't exist")
+    }
+    await User.deleteOne(user)
+    return{
+        mesg:"User deleted successfully"
+    }
+}
+module.exports = {createUser,login,findUser,deleteUser};
